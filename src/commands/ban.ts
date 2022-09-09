@@ -34,8 +34,8 @@ export class Ban extends Command {
 
 	@ModalComponent()
 	async BanForm(interaction: ModalSubmitInteraction): Promise<void> {
-		const [user, userId, rulesBroken, extraComments, banLength] =
-				["user", "userId", "rulesBroken", "extraComments", "banLength"]
+		const [userId, rulesBroken, extraComments, banLength] =
+				["userId", "rulesBroken", "extraComments", "banLength"]
 					.map(x => interaction.fields.getTextInputValue(x));
 
 		if (!interaction.guild) return;

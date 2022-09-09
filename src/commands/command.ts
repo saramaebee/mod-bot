@@ -17,12 +17,6 @@ export default class Command {
 			.setTitle(`${data.action.toString()} ${data.username}?`)
 			.setCustomId(data.customId);
 
-		const user = new TextInputBuilder()
-			.setCustomId("user")
-			.setLabel("user")
-			.setStyle(TextInputStyle.Short)
-			.setValue(`${data.username}#${data.discrim}`);
-
 		const userId = new TextInputBuilder()
 			.setCustomId("userId")
 			.setLabel("User ID")
@@ -31,7 +25,7 @@ export default class Command {
 
 		// TODO: checkboxes/multiselect? or hacky solution with multiple dropdowns
 		const rulesBrokenComponent = new TextInputBuilder()
-			.setCustomId("brokenRules")
+			.setCustomId("rulesBroken")
 			.setLabel("What rules were broken?")
 			.setStyle(TextInputStyle.Short)
 			.setValue("");
@@ -42,7 +36,7 @@ export default class Command {
 			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(false);
 
-		[user, userId, rulesBrokenComponent, extraCommentsComponent].concat(data.extraComponents || []).forEach(c => {
+		[userId, rulesBrokenComponent, extraCommentsComponent].concat(data.extraComponents || []).forEach(c => {
 			const row = new ActionRowBuilder<TextInputBuilder>()
 				.addComponents(c);
 
