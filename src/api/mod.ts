@@ -24,7 +24,11 @@ export class ModService {
 				const banLength = ModService.banLengthToSeconds(banAction.banLength);
 				// TODO: ask d.js team about deleteMessageSeconds field
 
-				action.slashInteraction.reply("Testing ModService");
+				banAction.slashInteraction.reply(`Banned ${banAction.user} because they broke the following rules:
+${banAction.rulesBroken}
+Action taken by: ${banAction.mod}
+Messages from the last ${banLength} were deleted. (I'll fix this eventually);
+Extra Comments: ${banAction.extraComments}`);
 				break;
 			default:
 				console.log("testing");
