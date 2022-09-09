@@ -12,7 +12,8 @@
     "emitDecoratorMetadata": true,
 
     "skipLibCheck": false,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
   },
   "exclude": ["build", "node_modules"]
 }
