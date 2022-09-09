@@ -22,7 +22,6 @@ export class Ban extends Command {
 				id: mentionable.user.id,
 				modUsername: interaction.user.username,
 				extraComponents: [
-					// TODO: manually submit API request for select component
 					new TextInputBuilder()
 						.setCustomId("banLength")
 						.setLabel("How far back should we delete messages?")

@@ -22,7 +22,6 @@ export class ModService {
 			case ModAction.Ban:
 				const banAction = action as Ban;
 				const banLength = ModService.banLengthToSeconds(banAction.banLength);
-				// TODO: ask d.js team about deleteMessageSeconds field
 
 				banAction.slashInteraction.reply(`Banned ${banAction.user} because they broke the following rules:
 ${banAction.rulesBroken}
@@ -44,7 +43,6 @@ Extra Comments: ${banAction.extraComments}`);
 		return;
 	}
 
-	// TODO: fix the string union
 	static banLengthToSeconds(length: "1h" | "6h" | "12h" | "24h" | "3d" | "7d" | "none" | string): number | undefined {
 		const seconds = {
 			"1h": 3600,
@@ -56,7 +54,6 @@ Extra Comments: ${banAction.extraComments}`);
 			"none": undefined
 		};
 
-		// TODO: return
 		return;
 	}
 }

@@ -23,7 +23,6 @@ export default class Command {
 			.setStyle(TextInputStyle.Short)
 			.setValue(data.id);
 
-		// TODO: checkboxes/multiselect? or hacky solution with multiple dropdowns
 		const rulesBrokenComponent = new TextInputBuilder()
 			.setCustomId("rulesBroken")
 			.setLabel("What rules were broken?")
