@@ -1,3 +1,6 @@
+import { Guild, GuildMember } from "discord.js";
+import { Action, Ban, BanOptions } from "../types";
+
 export enum ModAction {
   Ban = "ban",
   Kick = "kick",
@@ -5,18 +8,23 @@ export enum ModAction {
   Mute = "mute",
 }
 
-type Action = {
-  type: ModAction
-}
+export class ModService {
+	static async getMemberById(guild: Guild, id: string): Promise<GuildMember> {
+		return await guild.members.fetch(id);
+	}
 
-class ModService {
-	handleAction(action: Action): void {
-		if (Object.values(ModAction).includes(action.type)) {
-			this.log(action);
-			this.submitToDb(action);
+	static async handleAction(action: Action): Promise<void> {
+		if (Object.values(ModAction).includes(action.typeDiscriminator)) {
+			ModService.log(action);
+			ModService.submitToDb(action);
 		}
-		switch (action.type) {
+		switch (action.typeDiscriminator) {
 			case ModAction.Ban:
+				const banAction = action as Ban;
+				const banLength = ModService.banLengthToSeconds(banAction.banLength);
+				// TODO: ask d.js team about deleteMessageSeconds field
+
+				action.slashInteraction.reply("Testing ModService");
 				break;
 			default:
 				console.log("testing");
@@ -24,11 +32,27 @@ class ModService {
 		}
 	}
 
-	submitToDb(action: Action): void {
+	static submitToDb(action: Action): void {
 		return;
 	}
 
-	log(action: Action): void {
+	static log(action: Action): void {
+		return;
+	}
+
+	// TODO: fix the string union
+	static banLengthToSeconds(length: "1h" | "6h" | "12h" | "24h" | "3d" | "7d" | "none" | string): number | undefined {
+		const seconds = {
+			"1h": 3600,
+			"6h": 21600,
+			"12h": 43200,
+			"24h": 86400,
+			"3d": 259200,
+			"7d": 604800,
+			"none": undefined
+		};
+
+		// TODO: return
 		return;
 	}
 }
