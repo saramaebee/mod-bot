@@ -11,7 +11,7 @@ interface modalData {
   extraComponents?: TextInputBuilder[];
 }
 
-export default class Command {
+export default abstract class Command {
 	makeModal(data: modalData): ModalBuilder {
 		const modal = new ModalBuilder()
 			.setTitle(`${data.action.toString()} ${data.username}?`)
