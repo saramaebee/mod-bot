@@ -1,16 +1,17 @@
 import { ApplicationCommandOptionType, CommandInteraction, GuildMember, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Discord, ModalComponent, Slash, SlashOption } from "discordx";
 import Command from "./command.js";
-import { ModAction, ModService } from "../api/mod.js";
-import { Action, Ban as BanAction } from "../types";
+import { ModAction, ModService } from "../services/mod.js";
+import { Ban as BanAction } from "../types";
 
 @Discord()
 export class Ban extends Command {
-	@Slash({ name: "ban", description: "bans a user (5 strikes)" })
+	@Slash({ name: "ban", description: "bans a user" })
 	async run(
 		@SlashOption({ type: ApplicationCommandOptionType.User, name: "banned-user" }) mentionable: GuildMember,
 			interaction: CommandInteraction
 	): Promise<void> {
+		// Mute the user for 1 minute while waiting for the modal to be submit.
 		mentionable.timeout(60 * 1000);
 
 		interaction.showModal(
@@ -44,10 +45,6 @@ export class Ban extends Command {
 			mod: interaction.user,
 			slashInteraction: interaction,
 			user: await ModService.getMemberById(interaction.guild, userId),
-			/*
-			 * TODO: Find a better way to handle broken rules
-			 * 	see: https://discord.com/channels/240880736851329024/625285981871800332/1017409849216208987
-			 */
 			rulesBroken: rulesBroken.split(","),
 			banLength: banLength,
 			extraComments: extraComments
