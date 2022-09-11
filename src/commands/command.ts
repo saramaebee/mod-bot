@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
-import { ModAction } from "../api/mod";
+import { ModAction } from "../services/mod.js";
 
 interface modalData {
   action: ModAction;

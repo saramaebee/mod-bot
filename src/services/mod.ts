@@ -1,5 +1,5 @@
 import { Guild, GuildMember } from "discord.js";
-import { Action, Ban, BanOptions } from "../types";
+import { Action, Ban } from "../types";
 
 export enum ModAction {
   Ban = "ban",
@@ -23,11 +23,13 @@ export class ModService {
 				const banAction = action as Ban;
 				const banLength = ModService.banLengthToSeconds(banAction.banLength);
 
-				banAction.slashInteraction.reply(`Banned ${banAction.user} because they broke the following rules:
+				banAction.slashInteraction.reply(
+					`Banned ${banAction.user} because they broke the following rules:
 ${banAction.rulesBroken}
 Action taken by: ${banAction.mod}
 Messages from the last ${banLength} were deleted. (I'll fix this eventually);
-Extra Comments: ${banAction.extraComments}`);
+Extra Comments: ${banAction.extraComments}`
+				);
 				break;
 			default:
 				console.log("testing");
