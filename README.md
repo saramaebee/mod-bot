@@ -1,99 +1,17 @@
-<div>
-  <p align="center">
-    <a href="https://discordx.js.org" target="_blank" rel="nofollow">
-      <img src="https://discordx.js.org/discordx.svg" width="546" />
-    </a>
-  </p>
-  <p align="center">
-    <a href="https://discordx.js.org/discord"
-      ><img
-        src="https://img.shields.io/discord/874802018361950248?color=5865F2&logo=discord&logoColor=white"
-        alt="Discord server"
-    /></a>
-    <a href="https://www.npmjs.com/package/discordx"
-      ><img
-        src="https://img.shields.io/npm/v/discordx.svg?maxAge=3600"
-        alt="NPM version"
-    /></a>
-    <a href="https://www.npmjs.com/package/discordx"
-      ><img
-        src="https://img.shields.io/npm/dt/discordx.svg?maxAge=3600"
-        alt="NPM downloads"
-    /></a>
-    <a href="https://github.com/oceanroleplay/discord.ts/actions"
-      ><img
-        src="https://github.com/oceanroleplay/discord.ts/workflows/Build/badge.svg"
-        alt="Build status"
-    /></a>
-    <a href="https://www.paypal.me/vijayxmeena"
-      ><img
-        src="https://img.shields.io/badge/donate-paypal-F96854.svg"
-        alt="paypal"
-    /></a>
-  </p>
-  <p align="center">
-    <b> Create a discord bot with TypeScript and Decorators! </b>
-  </p>
-</div>
+# Not Just Your Average Mod Bot
+Originally created to be used with the [CodeSupport](https://codesupport.dev) [Discord server](https://codesupport.dev/discord).
 
-# 📖 Introduction
+As our community grew, finding an effective way to track the moderation of our users became difficult. If people wanted to attempt to appeal a moderative action taken against them, we had to find out who took the actions and wait for them to be available to explain the context of the actions and come to a decision. 
 
-A starter template equipped with several interaction commands, one event and one API route.
+We took a few actions to remedy this:
+1. We started logging all deleted messages to a private channel
+2. When moderators took action against a user, they would submit some details to a Google Form that would update another private channel
 
-# 🏗 Development
+This has served us well since for nearly 2.5 years, but it can be quite a hassle. If you ban the user and delete messages, you then have to go to the audit log to copy the user information. Because the form asks for username and user ID, you typically have to switch back and forth between users. Plus, who wants to do paperwork?
 
-```
-npm install
-npm run dev
-```
+This bot addresses the problem by taking advantage of the modals that Discord enables mod authors to use now. This bot uses a slash command/modal workflow to keep moderation of our Discord server IN Discord.
 
-If you want to use [Nodemon](https://nodemon.io/) to auto-reload while in development:
-
-```
-npm run watch
-```
-
-# 💻 Production
-
-```
-npm install --production
-npm run build
-npm run start
-```
-
-# 🐋 Docker
-
-To start your application:
-
-```
-docker-compose up -d
-```
-
-To shut down your application:
-
-```
-docker-compose down
-```
-
-To view your application's logs:
-
-```
-docker-compose logs
-```
-
-For the full command list please view the [Docker Documentation](https://docs.docker.com/engine/reference/commandline/cli/).
-
-# 📜 Documentation
-
-- [discordx.js.org](https://discordx.js.org)
-- [Tutorials (dev.to)](https://dev.to/oceanroleplay/series/14317)
-
-# ☎️ Need help?
-
-- [Check frequently asked questions](https://discordx.js.org/docs/faq)
-- [Check examples](https://github.com/oceanroleplay/discord.ts/tree/main/packages/discordx/examples)
-- Ask in the community [Discord server](https://discordx.js.org/discord)
-
-# 💖 Thank you
-
-You can support [discordx](https://www.npmjs.com/package/discordx) by giving it a [GitHub](https://github.com/oceanroleplay/discord.ts) star.
+## Limitations
+- Modals only allow so many fields
+- Modals have two input types: text and select
+  - Select inputs are not current supported by Discord.js, we'll need to submit manual API requests
