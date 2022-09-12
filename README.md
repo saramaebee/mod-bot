@@ -1,6 +1,11 @@
 # Not Just Your Average Mod Bot
 Originally created to be used with the [CodeSupport](https://codesupport.dev) [Discord server](https://codesupport.dev/discord).
 
+## Using
+Setup your `config.ts` and `.env` files based on their equivalent example files
+
+## History
+
 As our community grew, finding an effective way to track the moderation of our users became difficult. If people wanted to attempt to appeal a moderative action taken against them, we had to find out who took the actions and wait for them to be available to explain the context of the actions and come to a decision. 
 
 We took a few actions to remedy this:
