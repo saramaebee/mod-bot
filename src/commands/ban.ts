@@ -11,9 +11,6 @@ export class Ban extends Command {
 		@SlashOption({ type: ApplicationCommandOptionType.User, name: "banned-user" }) mentionable: GuildMember,
 			interaction: CommandInteraction
 	): Promise<void> {
-		// Mute the user for 1 minute while waiting for the modal to be submit.
-		mentionable.timeout(60 * 1000);
-
 		interaction.showModal(
 			this.makeModal({
 				action: ModAction.Ban,

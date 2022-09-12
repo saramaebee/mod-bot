@@ -1,4 +1,6 @@
-import { Guild, GuildMember } from "discord.js";
+import { ChannelType, Guild, GuildMember, MessagePayload } from "discord.js";
+
+import { config } from "../config.js";
 import { Action, Ban } from "../types";
 
 export enum ModAction {
@@ -14,22 +16,19 @@ export class ModService {
 	}
 
 	static async handleAction(action: Action): Promise<void> {
-		if (Object.values(ModAction).includes(action.typeDiscriminator)) {
-			ModService.log(action);
-			ModService.submitToDb(action);
+		if (!Object.values(ModAction).includes(action.typeDiscriminator)) {
+			return;
 		}
+		// Mute the user for 1 minute while waiting for the modal to be submit.
+		// Mentionable.timeout(60 * 1000);
+		ModService.log(action);
+
 		switch (action.typeDiscriminator) {
 			case ModAction.Ban:
 				const banAction = action as Ban;
 				const banLength = ModService.banLengthToSeconds(banAction.banLength);
 
-				banAction.slashInteraction.reply(
-					`Banned ${banAction.user} because they broke the following rules:
-${banAction.rulesBroken}
-Action taken by: ${banAction.mod}
-Messages from the last ${banLength} were deleted. (I'll fix this eventually);
-Extra Comments: ${banAction.extraComments}`
-				);
+				action.slashInteraction.reply(`Banning ${action.user.user.username} for ${banLength}s`);
 				break;
 			default:
 				console.log("testing");
@@ -37,12 +36,44 @@ Extra Comments: ${banAction.extraComments}`
 		}
 	}
 
-	static submitToDb(action: Action): void {
+	static async log(action: Action): Promise<void> {
+		const logChannel = await action.user.guild.channels.fetch(config.LOG_CHANNEL_ID);
+
+		if (!logChannel) {
+			throw new Error(`Channel with ID ${config.LOG_CHANNEL_ID} not found.`);
+		}
+		if (logChannel?.type !== ChannelType.GuildText) {
+			throw new Error(`Not implemented yet: ${logChannel?.type}`);
+		}
+
+		const thread = logChannel.threads.cache.find(c => c.name === action.user.user.id);
+
+		const embed = this.makeActionEmbed(action);
+
+		if (thread) {
+			thread?.send(embed);
+			logChannel.send(embed);
+		} else {
+			const newThread = await logChannel.send(`Member notes for: ${action.user}`);
+			const threadChannel = await newThread.startThread({name: action.user.user.id});
+
+			threadChannel.send(embed);
+			logChannel.send(embed);
+		}
+
 		return;
 	}
 
-	static log(action: Action): void {
-		return;
+	static makeActionEmbed(action: Action): MessagePayload | string {
+		/* eslint-disable no-extra-parens */
+		return `**Infraction:** ${action.user}: ${action.typeDiscriminator}
+**They broke the following rules:**
+${action.rulesBroken}
+
+**Action taken by:** ${action.mod}
+Messages from the last ${(action as Ban).banLength} were deleted.
+**Extra Comments:**
+${action.extraComments}`;
 	}
 
 	static banLengthToSeconds(length: "1h" | "6h" | "12h" | "24h" | "3d" | "7d" | "none" | string): number | undefined {
