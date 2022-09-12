@@ -50,7 +50,7 @@ bot.on("messageCreate", (message: Message) => {
 
 async function run() {
 	await importx(
-		`${dirname(import.meta.url)}/{events,commands,api}/**/*.{ts,js}`
+		`${dirname(import.meta.url)}/{events,commands,services}/**/*.{ts,js}`
 	);
 
 	if (!process.env.BOT_TOKEN) {

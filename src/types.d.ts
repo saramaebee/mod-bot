@@ -1,5 +1,5 @@
-import { GuildMember, Interaction, ModalSubmitInteraction, User } from "discord.js";
-import { ModAction } from "./api/mod";
+import { GuildMember, ModalSubmitInteraction, ThreadChannel, User } from "discord.js";
+import { ModAction } from "./services/mod";
 
 interface Action {
 	typeDiscriminator: ModAction;
@@ -16,4 +16,14 @@ interface Ban extends Action {
 
 interface BanOptions {
 	deleteMessageSeconds: number;
+}
+
+interface CsMember {
+	user: GuildMember;
+	aliases: string[];
+	usernames: string[];
+	userId: string;
+	infractions: Action[];
+	// TODO: fix this type?
+	logForum: ThreadChannel | undefined;
 }
