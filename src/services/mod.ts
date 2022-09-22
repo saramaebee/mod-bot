@@ -1,7 +1,7 @@
-import { ChannelType, Guild, GuildMember, MessagePayload } from "discord.js";
+import { BanOptions, ChannelType, Guild, GuildMember, MessagePayload } from "discord.js";
 
 import { config } from "../config.js";
-import { Action, Ban } from "../types";
+import { Action, Ban, Mute, DeleteMessagesLength } from "../types";
 
 export enum ModAction {
   Ban = "ban",
@@ -26,12 +26,17 @@ export class ModService {
 		switch (action.typeDiscriminator) {
 			case ModAction.Ban:
 				const banAction = action as Ban;
-				const banLength = ModService.banLengthToSeconds(banAction.banLength);
+				const deleteMessagesFrom = ModService.convertToSeconds(banAction.banLength);
 
-				action.slashInteraction.reply(`Banning ${action.user.user.username} for ${banLength}s`);
+				banAction.user.ban({ deleteMessageSeconds: deleteMessagesFrom } as BanOptions);
 				break;
-			default:
-				console.log("testing");
+			case ModAction.Kick:
+				action.user.kick();
+				break;
+			case ModAction.Mute:
+				const muteAction = action as Mute;
+
+				action.user.timeout(muteAction.muteLength);
 				break;
 		}
 	}
@@ -65,18 +70,31 @@ export class ModService {
 	}
 
 	static makeActionEmbed(action: Action): MessagePayload | string {
-		/* eslint-disable no-extra-parens */
+		let additional: string;
+
+		switch (action.typeDiscriminator) {
+			case ModAction.Ban:
+				/* eslint-disable no-extra-parens */
+				additional = `Messages from the last ${(action as Ban).banLength} were deleted.`;
+				break;
+			case ModAction.Mute:
+				/* eslint-disable no-extra-parens */
+				additional = `User timed out for: ${(action as Mute).muteLength}.`;
+				break;
+			default:
+				additional = "";
+		}
 		return `**Infraction:** ${action.user}: ${action.typeDiscriminator}
 **They broke the following rules:**
 ${action.rulesBroken}
 
 **Action taken by:** ${action.mod}
-Messages from the last ${(action as Ban).banLength} were deleted.
+${additional}
 **Extra Comments:**
 ${action.extraComments}`;
 	}
 
-	static banLengthToSeconds(length: "1h" | "6h" | "12h" | "24h" | "3d" | "7d" | "none" | string): number | undefined {
+	static convertToSeconds(length: DeleteMessagesLength): number | undefined {
 		const seconds = {
 			"1h": 3600,
 			"6h": 21600,
@@ -87,6 +105,6 @@ ${action.extraComments}`;
 			"none": undefined
 		};
 
-		return;
+		return seconds[length];
 	}
 }

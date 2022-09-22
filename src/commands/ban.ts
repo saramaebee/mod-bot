@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType, CommandInteraction, GuildMember, ModalSub
 import { Discord, ModalComponent, Slash, SlashOption } from "discordx";
 import Command from "./command.js";
 import { ModAction, ModService } from "../services/mod.js";
-import { Ban as BanAction } from "../types";
+import { Ban as BanAction, DeleteMessagesLength } from "../types";
 
 @Discord()
 export class Ban extends Command {
@@ -43,7 +43,7 @@ export class Ban extends Command {
 			slashInteraction: interaction,
 			user: await ModService.getMemberById(interaction.guild, userId),
 			rulesBroken: rulesBroken.split(","),
-			banLength: banLength,
+			banLength: banLength as DeleteMessagesLength,
 			extraComments: extraComments
 		};
 

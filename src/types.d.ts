@@ -10,8 +10,14 @@ interface Action {
 	extraComments?: string;
 }
 
+type DeleteMessagesLength = "1h" | "6h" | "12h" | "24h" | "3d" | "7d" | "none";
+
 interface Ban extends Action {
-	banLength: string;
+	banLength: DeleteMessagesLength;
+}
+
+interface Mute extends Action {
+	muteLength: number;
 }
 
 interface BanOptions {
