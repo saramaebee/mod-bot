@@ -25,31 +25,33 @@ export class ModService {
 
 		const mod = await action.user.guild.members.fetch(action.mod);
 
-		switch (action.typeDiscriminator) {
-			case ModAction.Ban:
-				if (mod.permissions.has(PermissionsBitField.Flags.BanMembers)) return;
-				const banAction = action as Ban;
-				const deleteMessagesFrom = ModService.convertToSeconds(banAction.deleteMessagesFrom);
+		if (!config.DEBUG) {
+			switch (action.typeDiscriminator) {
+				case ModAction.Ban:
+					if (mod.permissions.has(PermissionsBitField.Flags.BanMembers)) return;
+					const banAction = action as Ban;
+					const deleteMessagesFrom = ModService.convertToSeconds(banAction.deleteMessagesFrom);
 
-				banAction.user.ban({ deleteMessageSeconds: deleteMessagesFrom });
-				break;
-			case ModAction.Kick:
-				if (mod.permissions.has(PermissionsBitField.Flags.KickMembers)) return;
-				action.user.kick();
-				break;
-			case ModAction.Mute:
-				if (mod.permissions.has(PermissionsBitField.Flags.MuteMembers)) return;
-				const muteAction = action as Mute;
-				let muteLength;
+					banAction.user.ban({ deleteMessageSeconds: deleteMessagesFrom });
+					break;
+				case ModAction.Kick:
+					if (mod.permissions.has(PermissionsBitField.Flags.KickMembers)) return;
+					action.user.kick();
+					break;
+				case ModAction.Mute:
+					if (mod.permissions.has(PermissionsBitField.Flags.MuteMembers)) return;
+					const muteAction = action as Mute;
+					let muteLength;
 
-				try {
-					muteLength = Number.parseInt(muteAction.muteLength);
-					action.user.timeout(muteLength);
-				} catch (e) {
-					action.slashInteraction.reply("Timeout length could not be parsed, please try again.");
-					shouldLog = false;
-				}
-				break;
+					try {
+						muteLength = Number.parseInt(muteAction.muteLength);
+						action.user.timeout(muteLength);
+					} catch (e) {
+						action.slashInteraction.reply("Timeout length could not be parsed, please try again.");
+						shouldLog = false;
+					}
+					break;
+			}
 		}
 		if (shouldLog) {
 			ModService.log(action);
@@ -85,6 +87,7 @@ export class ModService {
 			logChannel.send({embeds: [newEmbed]});
 		}
 
+		action.slashInteraction.deferReply().then(() => action.slashInteraction.deleteReply());
 		return;
 	}
 
@@ -105,7 +108,7 @@ export class ModService {
 
 		const actionEmbed = new EmbedBuilder()
 			.setColor(config.EMBED_COLOR as ColorResolvable)
-			.setTitle(action.user.user.username)
+			.setTitle(config.DEBUG ? `DEBUGMODE: ${action.user.user.username}` : action.user.user.username)
 			.setURL(`https://discord.com/channels/${threadChannel.guildId}/${threadChannel.id}`)
 			.setAuthor({ name: action.mod.username, iconURL: action.mod.displayAvatarURL()})
 			.setDescription(`${action.user} had the following action taken against them: ${action.typeDiscriminator}`)
