@@ -1,4 +1,4 @@
-import { BanOptions, ChannelType, Guild, GuildMember, MessagePayload } from "discord.js";
+import { AnyThreadChannel, BanOptions, ChannelType, ColorResolvable, EmbedBuilder, Guild, GuildMember, MessagePayload, PermissionsBitField } from "discord.js";
 
 import { config } from "../config.js";
 import { Action, Ban, Mute, DeleteMessagesLength } from "../types";
@@ -20,24 +20,39 @@ export class ModService {
 			return;
 		}
 		// Mute the user for 1 minute while waiting for the modal to be submit.
-		// Mentionable.timeout(60 * 1000);
-		ModService.log(action);
+		action.user.timeout(60 * 1000);
+		let shouldLog = true;
+
+		const mod = await action.user.guild.members.fetch(action.mod);
 
 		switch (action.typeDiscriminator) {
 			case ModAction.Ban:
+				if (mod.permissions.has(PermissionsBitField.Flags.BanMembers)) return;
 				const banAction = action as Ban;
-				const deleteMessagesFrom = ModService.convertToSeconds(banAction.banLength);
+				const deleteMessagesFrom = ModService.convertToSeconds(banAction.deleteMessagesFrom);
 
-				banAction.user.ban({ deleteMessageSeconds: deleteMessagesFrom } as BanOptions);
+				banAction.user.ban({ deleteMessageSeconds: deleteMessagesFrom });
 				break;
 			case ModAction.Kick:
+				if (mod.permissions.has(PermissionsBitField.Flags.KickMembers)) return;
 				action.user.kick();
 				break;
 			case ModAction.Mute:
+				if (mod.permissions.has(PermissionsBitField.Flags.MuteMembers)) return;
 				const muteAction = action as Mute;
+				let muteLength;
 
-				action.user.timeout(muteAction.muteLength);
+				try {
+					muteLength = Number.parseInt(muteAction.muteLength);
+					action.user.timeout(muteLength);
+				} catch (e) {
+					action.slashInteraction.reply("Timeout length could not be parsed, please try again.");
+					shouldLog = false;
+				}
 				break;
+		}
+		if (shouldLog) {
+			ModService.log(action);
 		}
 	}
 
@@ -51,47 +66,52 @@ export class ModService {
 			throw new Error(`Not implemented yet: ${logChannel?.type}`);
 		}
 
-		const thread = logChannel.threads.cache.find(c => c.name === action.user.user.id);
+		const active = (await logChannel.threads.fetchActive(false)).threads.find(c => c.name === action.user.user.id);
+		const archived = (await logChannel.threads.fetchArchived({fetchAll: true})).threads.find(c => c.name === action.user.user.id);
 
-		const embed = this.makeActionEmbed(action);
+		const thread = active || archived;
 
 		if (thread) {
-			thread?.send(embed);
-			logChannel.send(embed);
+			const embed = this.makeActionEmbed(action, thread);
+
+			thread?.send({embeds: [embed]});
+			logChannel.send({embeds: [embed]});
 		} else {
 			const newThread = await logChannel.send(`Member notes for: ${action.user}`);
-			const threadChannel = await newThread.startThread({name: action.user.user.id});
+			const newThreadChannel = await newThread.startThread({name: action.user.user.id});
+			const newEmbed = this.makeActionEmbed(action, newThreadChannel);
 
-			threadChannel.send(embed);
-			logChannel.send(embed);
+			newThreadChannel.send({embeds: [newEmbed]});
+			logChannel.send({embeds: [newEmbed]});
 		}
 
 		return;
 	}
 
-	static makeActionEmbed(action: Action): MessagePayload | string {
-		let additional: string;
+	static makeActionEmbed(action: Action, threadChannel: AnyThreadChannel): EmbedBuilder {
+		const extraFields = [];
 
-		switch (action.typeDiscriminator) {
-			case ModAction.Ban:
-				/* eslint-disable no-extra-parens */
-				additional = `Messages from the last ${(action as Ban).banLength} were deleted.`;
-				break;
-			case ModAction.Mute:
-				/* eslint-disable no-extra-parens */
-				additional = `User timed out for: ${(action as Mute).muteLength}.`;
-				break;
-			default:
-				additional = "";
+		if (action.extraComments && action.extraComments.length > 0) {
+			extraFields.push({ name: "Extra Comments:", value: action.extraComments });
 		}
-		return `**Infraction:** ${action.user}: ${action.typeDiscriminator}
-**They broke the following rules:**
-${action.rulesBroken}
 
-**Action taken by:** ${action.mod}
-${additional}
-**Extra Comments:**
-${action.extraComments}`;
+		if (action.typeDiscriminator === ModAction.Ban) {
+			/* eslint-disable no-extra-parens */
+			extraFields.push({ name: "Messages removed from the last:", value: (action as Ban).deleteMessagesFrom });
+		} else if (action.typeDiscriminator === ModAction.Mute) {
+			/* eslint-disable no-extra-parens */
+			extraFields.push({ name: "Timeout duration:", value: (action as Mute).muteLength});
+		}
+
+		const actionEmbed = new EmbedBuilder()
+			.setColor(config.EMBED_COLOR as ColorResolvable)
+			.setTitle(action.user.user.username)
+			.setURL(`https://discord.com/channels/${threadChannel.guildId}/${threadChannel.id}`)
+			.setAuthor({ name: action.mod.username, iconURL: action.mod.displayAvatarURL()})
+			.setDescription(`${action.user} had the following action taken against them: ${action.typeDiscriminator}`)
+			.addFields(extraFields);
+
+		return actionEmbed;
 	}
 
 	static convertToSeconds(length: DeleteMessagesLength): number | undefined {

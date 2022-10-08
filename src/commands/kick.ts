@@ -8,9 +8,13 @@ import Command from "./command.js";
 export class Kick extends Command {
 	@Slash({ name: "kick", description: "kicks a user" })
 	async run(
-		@SlashOption({ type: ApplicationCommandOptionType.User, name: "kicked-user" }) mentionable: GuildMember,
+		@SlashOption({ type: ApplicationCommandOptionType.User, name: "kicked-user", description: "Who to kick" }) mentionable: GuildMember,
 			interaction: CommandInteraction
 	): Promise<void> {
+		if (!mentionable) {
+			interaction.reply("Please mention a user when trying to use that command.");
+			return;
+		}
 		interaction.showModal(
 			this.makeModal({
 				action: ModAction.Kick,

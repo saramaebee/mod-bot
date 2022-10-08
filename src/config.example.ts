@@ -1,3 +1,4 @@
 export const config = {
-	LOG_CHANNEL_ID: ""
+	LOG_CHANNEL_ID: "",
+	EMBED_COLOR: ""
 };
