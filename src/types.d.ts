@@ -13,11 +13,11 @@ interface Action {
 type DeleteMessagesLength = "1h" | "6h" | "12h" | "24h" | "3d" | "7d" | "none";
 
 interface Ban extends Action {
-	banLength: DeleteMessagesLength;
+	deleteMessagesFrom: DeleteMessagesLength;
 }
 
 interface Mute extends Action {
-	muteLength: number;
+	muteLength: string;
 }
 
 interface BanOptions {

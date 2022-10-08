@@ -8,9 +8,13 @@ import Command from "./command.js";
 export class Warn extends Command {
 	@Slash({ name: "warn", description: "warns a user" })
 	async run(
-		@SlashOption({ type: ApplicationCommandOptionType.User, name: "warned-user" }) mentionable: GuildMember,
+		@SlashOption({ type: ApplicationCommandOptionType.User, name: "warned-user", description: "Mutes a user" }) mentionable: GuildMember,
 			interaction: CommandInteraction
 	): Promise<void> {
+		if (!mentionable) {
+			interaction.reply("Please mention a user when trying to use that command.");
+			return;
+		}
 		interaction.showModal(
 			this.makeModal({
 				action: ModAction.Warn,
@@ -18,7 +22,8 @@ export class Warn extends Command {
 				username: mentionable.user.username,
 				discrim: mentionable.user.discriminator,
 				id: mentionable.user.id,
-				modUsername: interaction.user.username
+				modUsername: interaction.user.username,
+				extraComponents: []
 			})
 		);
 	}

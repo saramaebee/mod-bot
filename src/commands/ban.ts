@@ -8,9 +8,13 @@ import { Ban as BanAction, DeleteMessagesLength } from "../types";
 export class Ban extends Command {
 	@Slash({ name: "ban", description: "bans a user" })
 	async run(
-		@SlashOption({ type: ApplicationCommandOptionType.User, name: "banned-user" }) mentionable: GuildMember,
+		@SlashOption({ type: ApplicationCommandOptionType.User, name: "banned-user", description: "Who to ban" }) mentionable: GuildMember,
 			interaction: CommandInteraction
 	): Promise<void> {
+		if (!mentionable) {
+			interaction.reply("Please mention a user when trying to use that command.");
+			return;
+		}
 		interaction.showModal(
 			this.makeModal({
 				action: ModAction.Ban,
@@ -43,7 +47,7 @@ export class Ban extends Command {
 			slashInteraction: interaction,
 			user: await ModService.getMemberById(interaction.guild, userId),
 			rulesBroken: rulesBroken.split(","),
-			banLength: banLength as DeleteMessagesLength,
+			deleteMessagesFrom: banLength as DeleteMessagesLength,
 			extraComments: extraComments
 		};
 
